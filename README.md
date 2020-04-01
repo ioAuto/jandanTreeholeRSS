@@ -10,5 +10,5 @@ or
 
 
 ## Status
-[![Build dlc.dat](https://github.com/iochen/jandanTreeholeRSS/workflows/Build%20dlc.dat/badge.svg)](https://github.com/iochen/jandanTreeholeRSS/actions)
+![Publish rss.xml](https://github.com/iochen/jandanTreeholeRSS/workflows/Publish%20rss.xml/badge.svg?branch=master)
 [![Netlify Status](https://api.netlify.com/api/v1/badges/3cfcf441-7f36-457f-a5e1-294bdb876730/deploy-status)](https://app.netlify.com/sites/jandan/deploys)
