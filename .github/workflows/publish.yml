@@ -1,0 +1,45 @@
+name: Publish rss.xml
+on:
+  schedule:
+    - cron: "0 0/6 * * *"
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    name: Publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Go 1.14
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.14
+
+      - name: Set $GOPATH and more variables
+        run: |
+          echo "::set-env name=GOPATH::$(dirname $GITHUB_WORKSPACE)"
+        shell: bash
+
+      - name: Go get jandanTreeholeRSS
+        run: |
+          go get -u -v github.com/iochen/jandanTreeholeRSS/cmd/jandan_treehole_rss
+
+      - name: Generate rss.xml
+        run: |
+          ${GOPATH}/bin/jandan_treehole_rss
+
+      - name: Set redirect
+        run: |
+          echo "/ https://github.com/iochen/jandanTreeholeRSS 302" > _redirects
+
+      - name: Git push rss xml to "public" branch
+        run: |
+          git init
+          git config --local user.name "${{ github.actor }}"
+          git config --local user.email "${{ github.actor }}@users.noreply.github.com"
+          git checkout -b public
+          git add rss.xml _redirects
+          git commit -m "publish"
+          git remote add origin "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+          git push -f -u origin public
