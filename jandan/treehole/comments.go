@@ -3,7 +3,6 @@ package treehole
 import (
 	"encoding/json"
 	"github.com/iochen/jandanTreeholeRSS/jandan/common/network"
-	"io/ioutil"
 	"strconv"
 	"time"
 )
@@ -28,18 +27,15 @@ func (st *sTime) UnmarshalJSON(input []byte) error {
 	return nil
 }
 
-func GetComments(id ID) *[]Comment {
-	body, err := network.HttpGetWithUA("https://jandan.net/tucao/all/" + strconv.Itoa(int(id)))
+func GetComments(id ID) (*[]Comment, error) {
+	bytes, err := network.HttpGetWithUA("https://jandan.net/tucao/all/" + strconv.Itoa(int(id)))
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	bytes, err := ioutil.ReadAll(body)
-	if err != nil {
-		return nil
-	}
+
 	var cmtJson commentJson
 	if err := json.Unmarshal(bytes, &cmtJson); err != nil {
-		return nil
+		return nil, err
 	}
 	cmts := make([]Comment, len(cmtJson.Comments))
 	for k, v := range cmtJson.Comments {
@@ -51,5 +47,5 @@ func GetComments(id ID) *[]Comment {
 		}
 	}
 
-	return &cmts
+	return &cmts, err
 }

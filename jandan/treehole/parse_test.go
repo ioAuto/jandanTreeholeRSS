@@ -3,7 +3,6 @@ package treehole_test
 import (
 	"github.com/iochen/jandanTreeholeRSS/jandan/treehole"
 	"testing"
-	"time"
 )
 
 func TestGetFromID(t *testing.T) {
@@ -13,5 +12,4 @@ func TestGetFromID(t *testing.T) {
 	}
 	t.Log(th)
 	t.Log(th.Comments)
-	t.Log(time.Unix(50*4516747+1.359e9, 0))
 }

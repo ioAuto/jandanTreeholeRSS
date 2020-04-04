@@ -1,12 +1,11 @@
 package treehole
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/iochen/jandanTreeholeRSS/jandan/common/network"
-	"io"
-	"io/ioutil"
 	"regexp"
 	"strconv"
 	"strings"
@@ -18,8 +17,8 @@ type neighbourAPI struct {
 	Data Neighbour `json:"data"`
 }
 
-func ParseFromHtml(r io.Reader) (*Treehole, error) {
-	doc, err := goquery.NewDocumentFromReader(r)
+func ParseFromHtml(b []byte) (*Treehole, error) {
+	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(b))
 	if err != nil {
 		return &Treehole{}, err
 	}
@@ -39,14 +38,11 @@ func ParseFromHtml(r io.Reader) (*Treehole, error) {
 
 	jsScripts := doc.Find("script").Text()
 	apiResult := regexp.MustCompile(`/api/comment/neighbor/\d+/\d+`).FindString(jsScripts)
-	reader, err := network.HttpGetWithUA("https://jandan.net" + apiResult)
+	b, err = network.HttpGetWithUA("https://jandan.net" + apiResult)
 	if err != nil {
 		return &Treehole{}, err
 	}
-	b, err := ioutil.ReadAll(reader)
-	if err != nil {
-		return &Treehole{}, err
-	}
+
 	neighbour := &neighbourAPI{}
 	if err := json.Unmarshal(b, neighbour); err != nil {
 		return &Treehole{}, err
@@ -57,24 +53,29 @@ func ParseFromHtml(r io.Reader) (*Treehole, error) {
 		content += selection.Text() + "\n"
 	})
 
+	comments, err := GetComments(ID(id))
+	if err != nil {
+		return &Treehole{}, err
+	}
+
 	th := &Treehole{
 		ID:        ID(id),
 		Neighbour: neighbour.Data,
 		Author:    doc.Find("div.comment-topic b").Text(),
 		Content:   trimUesless(content),
-		Comments:  GetComments(ID(id)),
+		Comments:  comments,
 	}
 
 	return th, nil
 }
 
 func GetFromURL(url string) (*Treehole, error) {
-	body, err := network.HttpGetWithUA(url)
+	b, err := network.HttpGetWithUA(url)
 	if err != nil {
 		return nil, err
 	}
 
-	return ParseFromHtml(body)
+	return ParseFromHtml(b)
 }
 
 func GetFromID(id ID) (*Treehole, error) {
