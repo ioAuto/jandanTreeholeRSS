@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	FlagNum := flag.Uint("n", 50, "")
+	FlagNum := flag.Uint("n", 100, "")
 	FlagOut := flag.String("o", "rss.xml", "")
 	flag.Parse()
 
